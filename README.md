@@ -12,6 +12,7 @@ or through a built-in webserver with a REST interface.
 - Enable / Disable firewall rules on a Microtik Routerboard
 - Check connectivity (ping) to serveral IP addresses / urls
 - Control systemd services
+- Get the detailed status of a ZTE MF823 4G USB Modem
 
 ## Config file
 
