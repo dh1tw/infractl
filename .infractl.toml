@@ -1,0 +1,12 @@
+[microtik]
+address = "192.168.1.1"
+port = 8728
+username ="admin"
+password ="admin"
+
+[web]
+address = "localhost"
+port = 6566
+
+[connectivity]
+urls = ["google.de", "microsoft.com"]
