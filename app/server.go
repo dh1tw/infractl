@@ -1,9 +1,12 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/dh1tw/infractl/mf823"
 
 	"github.com/dh1tw/infractl/microtik"
 
@@ -13,9 +16,15 @@ import (
 type Server struct {
 	// db     *someDatabase
 	router  *mux.Router
-	mt      *microtik.Microtik
 	address string
 	port    int
+	config  config
+}
+
+type config struct {
+	microtik        *microtik.Microtik
+	mf823Address    string
+	mf823Parameters []string
 }
 
 // Option is the type used for functional options
@@ -24,18 +33,13 @@ type Option func(*Server)
 // New returns an instance of a Server configured according to the provided options.
 func New(opts ...Option) *Server {
 
-	mtConfig := microtik.Config{
-		Address:  "192.168.0.1",
-		Port:     8728,
-		Username: "admin",
-		Password: "admin",
-	}
-
 	s := &Server{
 		address: "localhost",
 		port:    6556,
 		router:  mux.NewRouter(),
-		mt:      microtik.New(mtConfig),
+		config: config{
+			mf823Parameters: []string{},
+		},
 	}
 
 	for _, opt := range opts {
@@ -55,7 +59,12 @@ func (s *Server) Init() error {
 func (s *Server) reset4g(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 
-	err := s.mt.Reset4G()
+	if s.config.microtik == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("no microtik instance configured"))
+		return
+	}
+	err := s.config.microtik.Reset4G()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -63,15 +72,27 @@ func (s *Server) reset4g(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *Server) checkConnectivity(w http.ResponseWriter, req *http.Request) {
+//retrieve the requested status from a ZTE MF823 4G modem
+func (s *Server) status4g(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 
-	err := s.mt.Reset4G()
-
+	resp, err := mf823.Status(s.config.mf823Address, s.config.mf823Parameters...)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+		return
 	}
+	j, err := json.Marshal(resp)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+
+	}
+	w.Write(j)
+}
+
+func (s *Server) checkConnectivity(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
 }
 
 // ListenHTTP starts a HTTP Server on a given network adapter / port and
