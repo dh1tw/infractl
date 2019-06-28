@@ -23,6 +23,22 @@ func Port(port int) func(*Server) {
 // router
 func Microtik(m *microtik.Microtik) func(*Server) {
 	return func(s *Server) {
-		s.mt = m
+		s.config.microtik = m
+	}
+}
+
+// Mf823Address is a functional option which sets the ip address of a
+// a ZTE MF823 4G USB modem
+func Mf823Address(a string) func(*Server) {
+	return func(s *Server) {
+		s.config.mf823Address = a
+	}
+}
+
+// Mf823Parameters is a functional option which sets the parameters which
+// will be retrieved from a ZTE MF823 4G USB modem
+func Mf823Parameters(p []string) func(*Server) {
+	return func(s *Server) {
+		s.config.mf823Parameters = p
 	}
 }
