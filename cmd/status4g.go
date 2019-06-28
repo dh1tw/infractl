@@ -42,10 +42,10 @@ func status4g(cmd *cobra.Command, args []string) {
 	configFileMsg := ""
 
 	if err := viper.ReadInConfig(); err == nil {
-		configFileMsg = fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed())
+		configFileMsg = fmt.Sprintf("Using config file: %s", viper.ConfigFileUsed())
 	} else {
 		if strings.Contains(err.Error(), "Not Found in") {
-			configFileMsg = fmt.Sprintf("no config file found\n")
+			configFileMsg = fmt.Sprintf("no config file found")
 		} else {
 			fmt.Println("Error parsing config file", viper.ConfigFileUsed())
 			fmt.Println(err)
