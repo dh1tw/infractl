@@ -39,11 +39,13 @@ func init() {
 func status4g(cmd *cobra.Command, args []string) {
 
 	// Try to read config file
+	configFileMsg := ""
+
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		configFileMsg = fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed())
 	} else {
 		if strings.Contains(err.Error(), "Not Found in") {
-			// fmt.Println("no config file found")
+			configFileMsg = fmt.Sprintf("no config file found\n")
 		} else {
 			fmt.Println("Error parsing config file", viper.ConfigFileUsed())
 			fmt.Println(err)
@@ -58,6 +60,10 @@ func status4g(cmd *cobra.Command, args []string) {
 	address := viper.GetString("mf823.address")
 	params := viper.GetStringSlice("mf823.parameters")
 	outputJSON := viper.GetBool("mf823.json")
+
+	if !outputJSON {
+		fmt.Println(configFileMsg)
+	}
 
 	res, err := mf823.Status(address, params...)
 
