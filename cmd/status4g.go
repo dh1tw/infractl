@@ -14,7 +14,7 @@ import (
 
 // status4gCmd represents the status4g command
 var status4gCmd = &cobra.Command{
-	Use:   "status4g",
+	Use:   "4g-status",
 	Short: "Request the status from a ZTE MF823 4G USB Modem",
 	Long: `Request the status from a ZTE MF823 4G USB Modem
 
@@ -45,7 +45,7 @@ func status4g(cmd *cobra.Command, args []string) {
 		configFileMsg = fmt.Sprintf("Using config file: %s", viper.ConfigFileUsed())
 	} else {
 		if strings.Contains(err.Error(), "Not Found in") {
-			configFileMsg = fmt.Sprintf("no config file found")
+			configFileMsg = fmt.Sprintf("no config file found\n")
 		} else {
 			fmt.Println("Error parsing config file", viper.ConfigFileUsed())
 			fmt.Println(err)

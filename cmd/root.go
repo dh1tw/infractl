@@ -13,16 +13,9 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "infractl",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Short: "infractl is a collection of tools for controlling network infrastructure",
+	Long: `infractl is a collection of tools for controlling network infrastructure.
+To get a list of supported commands, please check --help`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -37,14 +30,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.infractl.yaml)")
-	rootCmd.Flags().StringP("microtik-address", "a", "192.168.0.1", "address of your microtik router")
-	rootCmd.Flags().IntP("microtik-port", "p", 8728, "API port of your microtik router")
-	rootCmd.Flags().StringP("microtik-username", "U", "admin", "username for your microtik router")
-	rootCmd.Flags().StringP("microtik-password", "P", "admin", "password for your microtik router")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -52,8 +38,8 @@ func initConfig() {
 	if cfgFile != "" { // enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
 	} else {
-		viper.SetConfigName(".remoteRotator") // name of config file (without extension)
-		viper.AddConfigPath("$HOME")          // adding home directory as first search path
+		viper.SetConfigName(".infractl") // name of config file (without extension)
+		viper.AddConfigPath("$HOME")     // adding home directory as first search path
 		viper.AddConfigPath(".")
 	}
 

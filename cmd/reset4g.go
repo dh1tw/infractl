@@ -13,19 +13,25 @@ import (
 
 // reset4gCmd represents the reset4g command
 var reset4gCmd = &cobra.Command{
-	Use:   "reset4g",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "4g-reset",
+	Short: "Hard power reset of a 4G USB modem connected to the microtik router",
+	Long: `This command performs a hard power reset of a 4G stick connected
+to the internal USB port of a microtik routerboard. The power will be cut for
+5 seconds.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+You can save the details of your microtik router in the config file under the
+the key [microtik].
+`,
 	Run: reset4g,
 }
 
 func init() {
 	rootCmd.AddCommand(reset4gCmd)
+	reset4gCmd.Flags().StringP("address", "a", "192.168.0.1", "address of your microtik router")
+	reset4gCmd.Flags().IntP("port", "p", 8728, "API port of your microtik router")
+	reset4gCmd.Flags().StringP("username", "U", "admin", "username for your microtik router")
+	reset4gCmd.Flags().StringP("password", "P", "admin", "password for your microtik router")
+
 }
 
 func reset4g(cmd *cobra.Command, args []string) {
@@ -42,10 +48,10 @@ func reset4g(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	viper.BindPFlag("microtik.address", rootCmd.Flags().Lookup("microtik-address"))
-	viper.BindPFlag("microtik.port", rootCmd.Flags().Lookup("microtik-port"))
-	viper.BindPFlag("microtik.username", rootCmd.Flags().Lookup("microtik-username"))
-	viper.BindPFlag("microtik.password", rootCmd.Flags().Lookup("microtik-password"))
+	viper.BindPFlag("microtik.address", cmd.Flags().Lookup("address"))
+	viper.BindPFlag("microtik.port", cmd.Flags().Lookup("port"))
+	viper.BindPFlag("microtik.username", cmd.Flags().Lookup("username"))
+	viper.BindPFlag("microtik.password", cmd.Flags().Lookup("password"))
 
 	mConfig := microtik.Config{
 		Address:  viper.GetString("microtik.address"),
