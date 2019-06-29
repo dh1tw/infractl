@@ -23,7 +23,7 @@ This command requires elevated privileges`,
 
 func init() {
 	serviceCmd.AddCommand(restartCmd)
-	serviceCmd.Flags().StringSliceP("service", "s", []string{"myservice"}, "list of services to be restarted")
+	restartCmd.Flags().StringSliceP("service", "s", []string{"myservice"}, "list of services to be restarted")
 }
 
 func restart(cmd *cobra.Command, args []string) {
