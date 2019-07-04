@@ -19,6 +19,8 @@ type Config struct {
 	Password string
 }
 
+type RouteResult map[string]bool
+
 type Option func(m *Microtik)
 
 func New(c Config, opts ...Option) *Microtik {
@@ -71,32 +73,32 @@ func (m *Microtik) Reset4G() error {
 // 1. route disabled (bool)
 // 2. route active (bool)
 // 3. error
-func (m *Microtik) RouteStatus(name string) (bool, bool, error) {
+func (m *Microtik) RouteStatus(name string) (RouteResult, error) {
 
 	rComment, ok := m.routeIDs[name]
 	if !ok {
-		return false, false, fmt.Errorf("unknown route %s", name)
+		return nil, fmt.Errorf("unknown route %s", name)
 	}
 
 	if err := m.connect(); err != nil {
-		return false, false, err
+		return nil, err
 	}
 
 	reply, err := m.Run("/ip/route/print")
 	if err != nil {
-		return false, false, err
+		return nil, err
 	}
 
 	route, err := getRoute(reply, rComment)
 
 	if route == nil {
-		return false, false, fmt.Errorf("unable to find route %s", name)
+		return nil, fmt.Errorf("unable to find route %s", name)
 	}
 
 	disabled := false
 	d, ok := route["disabled"]
 	if !ok {
-		return false, false, fmt.Errorf("unable to determine parameter disabled of route %s", name)
+		return nil, fmt.Errorf("unable to determine parameter disabled of route %s", name)
 	}
 	if d == "true" {
 		disabled = true
@@ -105,13 +107,18 @@ func (m *Microtik) RouteStatus(name string) (bool, bool, error) {
 	active := false
 	a, ok := route["active"]
 	if !ok {
-		return false, false, fmt.Errorf("unable to determine parameter active of route %s", name)
+		return nil, fmt.Errorf("unable to determine parameter active of route %s", name)
 	}
 	if a == "true" {
 		active = true
 	}
 
-	return disabled, active, nil
+	res := RouteResult{
+		"disabled": disabled,
+		"active":   active,
+	}
+
+	return res, nil
 }
 
 func getRoute(reply *routeros.Reply, comment string) (map[string]string, error) {
