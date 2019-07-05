@@ -4,6 +4,19 @@ port = 8728
 username ="admin"
 password ="admin"
 
+[microtik.routes]
+routes = ["route-adsl", "route-4g"]
+json = false
+
+[route-adsl]
+name = "adsl"
+comment = "upstream route to adsl"
+
+[route-4g]
+name = "4g"
+comment = "backup route via 4G"
+
+
 [web]
 address = "localhost"
 port = 6566
