@@ -43,7 +43,7 @@ type pingResults map[string]pingResult
 type pingResult struct {
 	Address string        `json:"address"`
 	RTT     time.Duration `json:"rtt"`
-	Failed  bool          `json:"failed,omitempty"`
+	Failed  bool          `json:"failed"`
 }
 
 func checkPing(cmd *cobra.Command, args []string) {
