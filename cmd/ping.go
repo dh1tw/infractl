@@ -6,8 +6,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/dh1tw/infractl/connectivity"
 	"github.com/spf13/cobra"
@@ -38,14 +36,6 @@ func init() {
 	pingCmd.Flags().Bool("json", false, "outputs the result as json")
 }
 
-type pingResults map[string]pingResult
-
-type pingResult struct {
-	Address string        `json:"address"`
-	RTT     time.Duration `json:"rtt"`
-	Failed  bool          `json:"failed"`
-}
-
 func checkPing(cmd *cobra.Command, args []string) {
 
 	// Try to read config file
@@ -73,37 +63,7 @@ func checkPing(cmd *cobra.Command, args []string) {
 		fmt.Println(configFileMsg)
 	}
 
-	pingAsync := func(address string, wg *sync.WaitGroup, resCh chan<- pingResult) {
-		defer wg.Done()
-		var res pingResult
-		ping, err := connectivity.Ping(address)
-		if err != nil {
-			res = pingResult{address, time.Second * 0, true}
-		} else {
-			res = pingResult{address, ping, false}
-		}
-		resCh <- res
-	}
-
-	resultCh := make(chan pingResult)
-
-	wg := &sync.WaitGroup{}
-
-	for _, addr := range addrs {
-		wg.Add(1)
-		go pingAsync(addr, wg, resultCh)
-	}
-
-	results := make(pingResults)
-
-	go func() {
-		wg.Wait()
-		close(resultCh)
-	}()
-
-	for res := range resultCh {
-		results[res.Address] = res
-	}
+	results := connectivity.PingHosts(addrs)
 
 	if outputJSON {
 		j, err := json.Marshal(results)
@@ -117,11 +77,4 @@ func checkPing(cmd *cobra.Command, args []string) {
 	for _, r := range results {
 		fmt.Printf("%+v\n", r)
 	}
-}
-
-func (r pingResult) String() string {
-	if r.Failed {
-		return fmt.Sprintf("%s: failed", r.Address)
-	}
-	return fmt.Sprintf("%s: %v", r.Address, r.RTT)
 }
