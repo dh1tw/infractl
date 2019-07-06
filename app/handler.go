@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
+
+	"github.com/dh1tw/infractl/services"
 
 	"github.com/dh1tw/infractl/connectivity"
+	"github.com/gorilla/mux"
 
 	"github.com/dh1tw/infractl/mf823"
 )
@@ -83,4 +87,25 @@ func (s *Server) handleStatus4G(w http.ResponseWriter, req *http.Request) {
 
 	}
 	w.Write(j)
+}
+
+func (s *Server) handleServiceRestart(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	vars := mux.Vars(req)
+	sName := strings.ToLower(vars["service"])
+	sName = strings.Replace(sName, ".service", "", 1)
+
+	if _, ok := s.services[sName]; !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unauthorized service")))
+		return
+	}
+
+	if err := services.Restart(sName); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf(err.Error())))
+		return
+	}
 }

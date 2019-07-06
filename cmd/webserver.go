@@ -84,6 +84,12 @@ func webServer(cmd *cobra.Command, args []string) {
 		opts = append(opts, pingEnabled, pingInterval)
 	}
 
+	services := viper.GetStringSlice("systemd.services")
+	for _, s := range services {
+		service := webserver.Service(s)
+		opts = append(opts, service)
+	}
+
 	opts = append(opts, webserver.PingAddress(viper.GetStringSlice("ping.address")))
 
 	webserver := webserver.New(opts...)

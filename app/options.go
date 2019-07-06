@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"strings"
 	"time"
 
 	"github.com/dh1tw/infractl/microtik"
@@ -73,5 +74,15 @@ func PingEnabled(enabled bool) func(*Server) {
 func PingInterval(interval time.Duration) func(*Server) {
 	return func(s *Server) {
 		s.pingInterval = interval
+	}
+}
+
+// Service authorizes the webserver to control a systemd service. Services can
+// either be specified with or without the extension ".service"
+func Service(serviceName string) func(*Server) {
+	return func(s *Server) {
+		sName := strings.ToLower(serviceName)
+		sName = strings.Replace(sName, ".service", "", 1)
+		s.services[sName] = struct{}{}
 	}
 }
