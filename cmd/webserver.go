@@ -60,13 +60,39 @@ func webServer(cmd *cobra.Command, args []string) {
 		viper.IsSet("microtik.port") &&
 		viper.IsSet("microtik.username") &&
 		viper.IsSet("microtik.password") {
-		mConfig := microtik.Config{
+
+		mtConfig := microtik.Config{
 			Address:  viper.GetString("microtik.address"),
 			Port:     viper.GetInt("microtik.port"),
 			Username: viper.GetString("microtik.username"),
 			Password: viper.GetString("microtik.password"),
 		}
-		mt := webserver.Microtik(microtik.New(mConfig))
+
+		mtOpts := []microtik.Option{}
+
+		if viper.IsSet("microtik.routes.routes") {
+			routes := viper.GetStringSlice("microtik.routes.routes")
+			for _, r := range routes {
+				rMap := viper.GetStringMapString(r)
+				if len(rMap) == 0 {
+					log.Fatalf("hashmap for route %s not found in config file", r)
+				}
+				name, ok := rMap["name"]
+				if !ok {
+					log.Fatalf("hashmap for route %s missing parameter 'name'", r)
+				}
+				comment, ok := rMap["comment"]
+				if !ok {
+					log.Fatalf("hashmap for route %s missing parameter 'comment'", r)
+				}
+
+				mtOpt := microtik.RouteID(name, comment)
+				mtOpts = append(mtOpts, mtOpt)
+				opts = append(opts, webserver.Route(name))
+			}
+		}
+
+		mt := webserver.Microtik(microtik.New(mtConfig, mtOpts...))
 		opts = append(opts, mt)
 	}
 

@@ -31,6 +31,7 @@ type Server struct {
 	pingHosts       []string
 	pingResults     connectivity.PingResults
 	services        map[string]struct{}
+	mtRoutes        []string
 }
 
 // Option is the type used for functional options
@@ -52,6 +53,7 @@ func New(opts ...Option) *Server {
 		mf823Parameters: []string{},
 		errorCh:         make(chan struct{}),
 		services:        make(map[string]struct{}),
+		mtRoutes:        []string{},
 	}
 
 	for _, opt := range opts {

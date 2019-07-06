@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dh1tw/infractl/microtik"
+
 	"github.com/dh1tw/infractl/services"
 
 	"github.com/dh1tw/infractl/connectivity"
@@ -62,6 +64,7 @@ func (s *Server) handleReset4G(w http.ResponseWriter, req *http.Request) {
 //retrieve the requested status from a ZTE MF823 4G modem
 func (s *Server) handleStatus4G(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	s.RLock()
 	addr := s.mf823Address
@@ -93,6 +96,9 @@ func (s *Server) handleServiceRestart(w http.ResponseWriter, req *http.Request) 
 	defer req.Body.Close()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
+	s.Lock()
+	defer s.Unlock()
+
 	vars := mux.Vars(req)
 	sName := strings.ToLower(vars["service"])
 	sName = strings.Replace(sName, ".service", "", 1)
@@ -106,6 +112,106 @@ func (s *Server) handleServiceRestart(w http.ResponseWriter, req *http.Request) 
 	if err := services.Restart(sName); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf(err.Error())))
+		return
+	}
+}
+
+func (s *Server) handleRoutes(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	s.RLock()
+	defer s.RUnlock()
+
+	if s.microtik == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("no microtik instance configured"))
+		return
+	}
+
+	results := make(map[string]microtik.RouteResult)
+
+	for _, route := range s.mtRoutes {
+		res, err := s.microtik.RouteStatus(route)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+		}
+		results[route] = res
+	}
+
+	j, err := json.Marshal(results)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+
+	}
+	w.Write(j)
+}
+
+func (s *Server) handleRoute(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	s.RLock()
+	defer s.RUnlock()
+
+	if s.microtik == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("no microtik instance configured"))
+		return
+	}
+
+	vars := mux.Vars(req)
+	rName := strings.ToLower(vars["route"])
+
+	res, err := s.microtik.RouteStatus(rName)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+	}
+
+	j, err := json.Marshal(res)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+
+	}
+	w.Write(j)
+}
+
+func (s *Server) handleRouteEnable(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	s.Lock()
+	defer s.Unlock()
+
+	vars := mux.Vars(req)
+	rName := strings.ToLower(vars["route"])
+
+	err := s.microtik.SetRoute(rName, "disabled=false")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+}
+
+func (s *Server) handleRouteDisable(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	s.Lock()
+	defer s.Unlock()
+
+	vars := mux.Vars(req)
+	rName := strings.ToLower(vars["route"])
+
+	err := s.microtik.SetRoute(rName, "disabled=true")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
 }

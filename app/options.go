@@ -23,7 +23,7 @@ func Port(port int) func(*Server) {
 }
 
 // ErrorCh is a functional option which provides channel to the webserver
-// which will be closed if an unrecoverable error happens.
+// which will be closed if an unrecoverable error happens
 func ErrorCh(ch chan struct{}) func(*Server) {
 	return func(s *Server) {
 		s.errorCh = ch
@@ -63,7 +63,7 @@ func PingAddress(addresses []string) func(*Server) {
 
 // PingEnabled enables the background job to ping the provided hosts
 // in the defined interval. Otherwise the hosts will only be pinged
-// on the execution of the corresponing http call.
+// on the execution of the corresponing http call
 func PingEnabled(enabled bool) func(*Server) {
 	return func(s *Server) {
 		s.pingEnabled = enabled
@@ -84,5 +84,13 @@ func Service(serviceName string) func(*Server) {
 		sName := strings.ToLower(serviceName)
 		sName = strings.Replace(sName, ".service", "", 1)
 		s.services[sName] = struct{}{}
+	}
+}
+
+// Route authorizes the webserver to access a microtik route
+func Route(routeName string) func(*Server) {
+	return func(s *Server) {
+		rName := strings.ToLower(routeName)
+		s.mtRoutes = append(s.mtRoutes, rName)
 	}
 }

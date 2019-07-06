@@ -2,6 +2,7 @@ package microtik
 
 import (
 	"fmt"
+	"strings"
 
 	"gopkg.in/routeros.v2"
 )
@@ -86,6 +87,8 @@ func (m *Microtik) Reset4G() error {
 // 3. error
 func (m *Microtik) RouteStatus(name string) (RouteResult, error) {
 
+	name = strings.ToLower(name)
+
 	rComment, ok := m.routeIDs[name]
 	if !ok {
 		return nil, fmt.Errorf("unknown route %s", name)
@@ -136,6 +139,8 @@ func (m *Microtik) RouteStatus(name string) (RouteResult, error) {
 // device (ip/route). The corresponding route must be registered during
 // construction of the Microtik object, otherwise this method will fail.
 func (m *Microtik) SetRoute(name, command string) error {
+
+	name = strings.ToLower(name)
 
 	rComment, ok := m.routeIDs[name]
 	if !ok {
