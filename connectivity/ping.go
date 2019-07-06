@@ -22,7 +22,7 @@ type PingResult struct {
 // the round trip time. In case the IP address is unreachable, an error
 // will be returned after 2 seconds.
 // In order to execute this command you might need elevated privileges on Linux.
-// See: https://github.com/sparrc/go-ping
+// See: https://github.com/sparrc/go-ping for more details.
 func PingHost(address string) (time.Duration, error) {
 	timeout := time.NewTimer(time.Second * 2).C
 	avgPing := time.Second * 2
@@ -31,6 +31,8 @@ func PingHost(address string) (time.Duration, error) {
 	if err != nil {
 		return avgPing, err
 	}
+
+	pinger.SetPrivileged(true)
 
 	result := make(chan (*goping.Statistics))
 
@@ -54,7 +56,7 @@ func PingHost(address string) (time.Duration, error) {
 // In case the IP address is unreachable, an error will be returned after
 // 2 seconds.
 // In order to execute this command you might need elevated privileges on Linux.
-// See: https://github.com/sparrc/go-ping
+// See: https://github.com/sparrc/go-ping for more details
 func PingHosts(addresses []string) PingResults {
 
 	resultCh := make(chan PingResult)

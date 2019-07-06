@@ -21,8 +21,8 @@ the average round trip time.
 
 Under Linux, sending pings require elevated privileges. You can either:
 1. run this command with root privileges (sudo)
-2. enable unprivileged pings with:
-	'sudo sysctl -w net.ipv4.ping_group_range="0   2147483647"'
+2. bind this executable to a raw socket:
+	'setcap cap_net_raw=+ep /usr/local/bin/infractl'
 
 The result can be optionally written to stdio in JSON. In this case the
 ping's round trip time will be returned in nano seconds.`,
