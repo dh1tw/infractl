@@ -16,7 +16,6 @@ comment = "upstream route to adsl"
 name = "4g"
 comment = "backup route via 4G"
 
-
 [web]
 address = "localhost"
 port = 6566
@@ -24,6 +23,8 @@ port = 6566
 [ping]
 address = ["google.de", "cnn.com"]
 json = false
+# enabled = false
+interval = "10s"
 
 [mf823]
 address = "192.168.3.1"

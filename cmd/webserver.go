@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"strings"
 
-	"github.com/dh1tw/infractl/app"
+	webserver "github.com/dh1tw/infractl/app"
 	"github.com/dh1tw/infractl/microtik"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -48,33 +49,53 @@ func webServer(cmd *cobra.Command, args []string) {
 
 	viper.BindPFlag("web.address", cmd.Flags().Lookup("address"))
 	viper.BindPFlag("web.port", cmd.Flags().Lookup("port"))
-	viper.BindPFlag("microtik.address", rootCmd.Flags().Lookup("microtik-address"))
-	viper.BindPFlag("microtik.port", rootCmd.Flags().Lookup("microtik-port"))
-	viper.BindPFlag("microtik.username", rootCmd.Flags().Lookup("microtik-username"))
-	viper.BindPFlag("microtik.password", rootCmd.Flags().Lookup("microtik-password"))
+	errorCh := make(chan struct{})
 
-	mConfig := microtik.Config{
-		Address:  viper.GetString("microtik.address"),
-		Port:     viper.GetInt("microtik.port"),
-		Username: viper.GetString("microtik.username"),
-		Password: viper.GetString("microtik.password"),
+	addr := webserver.Address(viper.GetString("web.address"))
+	port := webserver.Port(viper.GetInt("web.port"))
+
+	opts := []webserver.Option{addr, port, webserver.ErrorCh(errorCh)}
+
+	if viper.IsSet("microtik.address") &&
+		viper.IsSet("microtik.port") &&
+		viper.IsSet("microtik.username") &&
+		viper.IsSet("microtik.password") {
+		mConfig := microtik.Config{
+			Address:  viper.GetString("microtik.address"),
+			Port:     viper.GetInt("microtik.port"),
+			Username: viper.GetString("microtik.username"),
+			Password: viper.GetString("microtik.password"),
+		}
+		mt := webserver.Microtik(microtik.New(mConfig))
+		opts = append(opts, mt)
 	}
 
-	addr := app.Address(viper.GetString("web.address"))
-	port := app.Port(viper.GetInt("web.port"))
-	mt := app.Microtik(microtik.New(mConfig))
+	if viper.IsSet("mf823.address") &&
+		viper.IsSet("mf823.parameters") {
+		mf832Addr := webserver.Mf823Address(viper.GetString("mf823.address"))
+		mf832Params := webserver.Mf823Parameters(viper.GetStringSlice("mf823.parameters"))
+		opts = append(opts, mf832Addr, mf832Params)
+	}
 
-	webserver := app.New(addr, port, mt)
+	if viper.IsSet("ping.enabled") &&
+		viper.IsSet("ping.interval") {
+		pingEnabled := webserver.PingEnabled(viper.GetBool("ping.enabled"))
+		pingInterval := webserver.PingInterval(viper.GetDuration("ping.interval"))
+		opts = append(opts, pingEnabled, pingInterval)
+	}
 
-	errorCh := make(chan struct{})
+	opts = append(opts, webserver.PingAddress(viper.GetStringSlice("ping.address")))
+
+	webserver := webserver.New(opts...)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
-	go webserver.ListenHTTP(errorCh)
+	go webserver.Serve()
 
 	select {
 	case <-errorCh:
+		log.Fatal("something failed")
 	case <-c:
 	}
 
