@@ -9,7 +9,8 @@ or through a built-in webserver with a REST interface.
 ## Features
 
 - Reset 4G Modem connected to a Microtik Routerboard
-- Enable / Disable firewall rules on a Microtik Routerboard
+- check status of routes (ip/route) on a Microtik Routerboard
+- set parameters on routes (ip/route) on a Microtik Routerboard
 - Check connectivity (ping) to serveral IP addresses / urls
 - Control systemd services
 - Get the detailed status of a ZTE MF823 4G USB Modem
