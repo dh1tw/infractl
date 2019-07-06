@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -37,7 +36,7 @@ func Restart(name string) error {
 	// created job object.
 	job, err := conn.ReloadOrRestartUnit(name, "replace", resultCh)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if job == 0 {
