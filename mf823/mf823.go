@@ -35,7 +35,7 @@ func Status(address string, params ...string) (map[string]interface{}, error) {
 	// assemble the url to be queried
 	_url := "http://" + address + "/goform/goform_get_cmd_process?" + urlParams.Encode()
 
-	client := http.Client{}
+	client := http.Client{Timeout: time.Second}
 	req, err := http.NewRequest(
 		http.MethodGet,
 		_url,
@@ -59,6 +59,8 @@ func Status(address string, params ...string) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(resp.Status)
