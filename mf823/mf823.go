@@ -1,7 +1,6 @@
 package mf823
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -49,10 +48,6 @@ func Status(address string, params ...string) (map[string]interface{}, error) {
 	// Referer header is mandatory. Otherwise no data will be returned.
 	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
 	req.Header.Set("Referer", "http://"+address+"/status.html")
-
-	ctx, cancel := context.WithTimeout(req.Context(), time.Duration(3*time.Second))
-	defer cancel()
-	req = req.WithContext(ctx)
 
 	resp, err := client.Do(req)
 
