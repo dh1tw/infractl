@@ -15,7 +15,7 @@ import (
 )
 
 type Server struct {
-	sync.RWMutex
+	sync.Mutex
 	router          *mux.Router
 	address         string
 	port            int
@@ -102,9 +102,9 @@ func (s *Server) startPing(interval time.Duration) {
 	ticker := time.NewTicker(interval).C
 
 	for {
-		s.RLock()
+		s.Lock()
 		hosts := s.pingHosts
-		s.RUnlock()
+		s.Unlock()
 
 		res := connectivity.PingHosts(hosts)
 		s.Lock()

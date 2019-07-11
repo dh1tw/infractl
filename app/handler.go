@@ -3,7 +3,6 @@ package webserver
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -20,12 +19,13 @@ import (
 func (s *Server) handlePing(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	s.RLock()
+	s.Lock()
 	res := s.pingResults
 	enabled := s.pingEnabled
 	hosts := s.pingHosts
-	s.RUnlock()
+	s.Unlock()
 
 	// execute the ping if the background pinging has not been enabled
 	if !enabled {
@@ -33,7 +33,6 @@ func (s *Server) handlePing(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if err := json.NewEncoder(w).Encode(res); err != nil {
-		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("unable to encode ping data to json"))
 	}
@@ -43,9 +42,10 @@ func (s *Server) handlePing(w http.ResponseWriter, req *http.Request) {
 // the routerboard)
 func (s *Server) handleReset4G(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	s.RLock()
-	defer s.RUnlock()
+	s.Lock()
+	defer s.Unlock()
 
 	if s.microtik == nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -65,11 +65,12 @@ func (s *Server) handleReset4G(w http.ResponseWriter, req *http.Request) {
 func (s *Server) handleStatus4G(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	s.RLock()
+	s.Lock()
 	addr := s.mf823Address
 	params := s.mf823Parameters
-	s.RUnlock()
+	s.Unlock()
 
 	if len(addr) == 0 {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -95,6 +96,7 @@ func (s *Server) handleStatus4G(w http.ResponseWriter, req *http.Request) {
 func (s *Server) handleServiceRestart(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	s.Lock()
 	defer s.Unlock()
@@ -119,9 +121,10 @@ func (s *Server) handleServiceRestart(w http.ResponseWriter, req *http.Request) 
 func (s *Server) handleRoutes(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	s.RLock()
-	defer s.RUnlock()
+	s.Lock()
+	defer s.Unlock()
 
 	if s.microtik == nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -152,9 +155,10 @@ func (s *Server) handleRoutes(w http.ResponseWriter, req *http.Request) {
 func (s *Server) handleRoute(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	s.RLock()
-	defer s.RUnlock()
+	s.Lock()
+	defer s.Unlock()
 
 	if s.microtik == nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -183,6 +187,7 @@ func (s *Server) handleRoute(w http.ResponseWriter, req *http.Request) {
 func (s *Server) handleRouteEnable(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	s.Lock()
 	defer s.Unlock()
@@ -201,6 +206,7 @@ func (s *Server) handleRouteEnable(w http.ResponseWriter, req *http.Request) {
 func (s *Server) handleRouteDisable(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	s.Lock()
 	defer s.Unlock()
