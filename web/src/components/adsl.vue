@@ -1,7 +1,14 @@
 <template>
   <section class="frame">
-    <b-loading :is-full-page="false" :active.sync="is_loading" :can-cancel="false"></b-loading>
-    <div class="message" v-bind:class="{'is-success': active, 'is-black': !active}">
+    <b-loading
+      :is-full-page="false"
+      :active.sync="is_loading"
+      :can-cancel="false"
+    ></b-loading>
+    <div
+      class="message"
+      v-bind:class="{ 'is-success': active, 'is-black': !active }"
+    >
       <h4 class="message-header">ADSL</h4>
       <div class="message-body">
         <div class="container">
@@ -12,8 +19,12 @@
             <div class="column is-6">
               <span
                 class="tag is-pulled-left"
-                v-bind:class="{'is-danger': !connected, 'is-success': connected}"
-              >{{_connectedText}}</span>
+                v-bind:class="{
+                  'is-danger': !connected,
+                  'is-success': connected,
+                }"
+                >{{ _connectedText }}</span
+              >
             </div>
           </div>
         </div>
@@ -25,8 +36,9 @@
             <div class="column is-6">
               <span
                 class="tag is-pulled-left"
-                v-bind:class="{'is-danger': !ping, 'is-success': ping}"
-              >{{ _pingText }}</span>
+                v-bind:class="{ 'is-danger': !ping, 'is-success': ping }"
+                >{{ _pingText }}</span
+              >
             </div>
           </div>
         </div>
@@ -38,8 +50,9 @@
             <div class="column is-6">
               <span
                 class="tag is-pulled-left"
-                v-bind:class="{'is-danger': !active, 'is-success': active}"
-              >{{_activeText}}</span>
+                v-bind:class="{ 'is-danger': !active, 'is-success': active }"
+                >{{ _activeText }}</span
+              >
             </div>
           </div>
         </div>
@@ -47,13 +60,14 @@
         <nav class="level">
           <div class="level-item has-text-centered">
             <div>
-              <p>Change to ADSL</p>
+              <p>Change to ADSL (Shack)</p>
               <b-button
                 class="button is-info"
                 :loading="activating_adsl"
                 :disabled="active || is_loading"
                 v-on:click="activateAdsl"
-              >Activate</b-button>
+                >Activate</b-button
+              >
             </div>
           </div>
         </nav>
