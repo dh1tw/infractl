@@ -23,7 +23,7 @@ port = 6566
 [ping]
 address = ["google.de", "cnn.com"]
 json = false
-# enabled = false
+enabled = false
 interval = "10s"
 
 [mf823]

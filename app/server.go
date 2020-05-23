@@ -10,6 +10,7 @@ import (
 
 	"github.com/dh1tw/infractl/connectivity"
 	"github.com/dh1tw/infractl/microtik"
+	"github.com/markbates/pkger"
 
 	"github.com/gorilla/mux"
 )
@@ -19,6 +20,7 @@ type Server struct {
 	router          *mux.Router
 	address         string
 	port            int
+	fileServer      http.Handler
 	apiVersion      string
 	apiMatch        *regexp.Regexp
 	errorCh         chan struct{}
@@ -45,7 +47,7 @@ func New(opts ...Option) *Server {
 		port:            6556,
 		apiVersion:      "1.0",
 		apiMatch:        regexp.MustCompile(`api\/v\d\.\d\/`),
-		router:          mux.NewRouter(),
+		router:          mux.NewRouter().StrictSlash(true),
 		pingHosts:       []string{},
 		pingEnabled:     false,
 		pingInterval:    time.Duration(time.Second * 10),
@@ -59,8 +61,6 @@ func New(opts ...Option) *Server {
 	for _, opt := range opts {
 		opt(s)
 	}
-
-	s.routes()
 
 	return s
 }
@@ -86,6 +86,10 @@ func (s *Server) Serve() {
 	}
 
 	url := fmt.Sprintf("%s:%d", s.address, s.port)
+
+	s.fileServer = http.FileServer(pkger.Dir("/web/dist"))
+
+	s.routes()
 
 	// Listen for incoming connections.
 	log.Printf("listening on %s for HTTP connections\n", url)

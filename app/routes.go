@@ -9,4 +9,5 @@ func (s *Server) routes() {
 	s.router.HandleFunc("/api/v1.0/route/{route}", s.handleRoute)
 	s.router.HandleFunc("/api/v1.0/route/{route}/enable", s.handleRouteEnable)
 	s.router.HandleFunc("/api/v1.0/route/{route}/disable", s.handleRouteDisable)
+	s.router.PathPrefix("/").Handler(s.fileServer)
 }

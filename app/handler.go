@@ -137,7 +137,6 @@ func (s *Server) handleRoutes(w http.ResponseWriter, req *http.Request) {
 	for _, route := range s.mtRoutes {
 		res, err := s.microtik.RouteStatus(route)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 		}
 		results[route] = res

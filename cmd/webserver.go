@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -11,6 +12,9 @@ import (
 	"github.com/dh1tw/infractl/microtik"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	// profiling
+	_ "net/http/pprof"
 )
 
 // webServerCmd represents the web command
@@ -46,6 +50,11 @@ func webServer(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 	}
+
+	// Profiling (uncomment if needed)
+	go func() {
+		log.Println(http.ListenAndServe("0.0.0.0:6060", http.DefaultServeMux))
+	}()
 
 	viper.BindPFlag("web.address", cmd.Flags().Lookup("address"))
 	viper.BindPFlag("web.port", cmd.Flags().Lookup("port"))

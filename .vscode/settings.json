@@ -1,0 +1,7 @@
+{
+    "prettier.eslintIntegration": true,
+    "trailing-spaces.trimOnSave": true,
+    "editor.formatOnSave": true,
+    "prettier.jsxBracketSameLine": true,
+    "prettier.quoteProps": "consistent",
+}
