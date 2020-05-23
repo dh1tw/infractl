@@ -1,7 +1,14 @@
 <template>
   <section class="frame">
-    <b-loading :is-full-page="false" :active.sync="is_loading" :can-cancel="false"></b-loading>
-    <div class="message" v-bind:class="{'is-success': active, 'is-black': !active}">
+    <b-loading
+      :is-full-page="false"
+      :active.sync="is_loading"
+      :can-cancel="false"
+    ></b-loading>
+    <div
+      class="message"
+      v-bind:class="{ 'is-success': active, 'is-black': !active }"
+    >
       <h4 class="message-header">LTE / 4G</h4>
       <div class="message-body">
         <div class="container">
@@ -12,8 +19,12 @@
             <div class="column is-5">
               <span
                 class="tag is-pulled-left"
-                v-bind:class="{'is-danger': !connected, 'is-success': connected}"
-              >{{ _connectedText }}</span>
+                v-bind:class="{
+                  'is-danger': !connected,
+                  'is-success': connected,
+                }"
+                >{{ _connectedText }}</span
+              >
             </div>
           </div>
         </div>
@@ -25,8 +36,9 @@
             <div class="column is-5">
               <span
                 class="tag is-pulled-left"
-                v-bind:class="{'is-danger': !ping, 'is-success': ping}"
-              >{{ _pingText }}</span>
+                v-bind:class="{ 'is-danger': !ping, 'is-success': ping }"
+                >{{ _pingText }}</span
+              >
             </div>
           </div>
         </div>
@@ -38,8 +50,9 @@
             <div class="column is-5">
               <span
                 class="tag is-pulled-left"
-                v-bind:class="{'is-danger': !active, 'is-success': active}"
-              >{{ _activeText }}</span>
+                v-bind:class="{ 'is-danger': !active, 'is-success': active }"
+                >{{ _activeText }}</span
+              >
             </div>
           </div>
         </div>
@@ -122,7 +135,9 @@
               <p class="is-pulled-right has-text-weight-bold">Monthly usage:</p>
             </div>
             <div class="column is-5">
-              <p class="is-pulled-left has-text-weight-bold">{{ _consumption }}</p>
+              <p class="is-pulled-left has-text-weight-bold">
+                {{ _consumption }}
+              </p>
             </div>
           </div>
         </div>
@@ -156,7 +171,8 @@
                 :loading="resetting_4g"
                 :disabled="is_loading"
                 v-on:click="reset4g"
-              >Reset</b-button>
+                >Reset</b-button
+              >
             </div>
           </div>
           <div class="level-item has-text-centered">
@@ -167,7 +183,8 @@
                 :loading="activating_4g"
                 :disabled="active || is_loading"
                 v-on:click="activate4g"
-              >Activate</b-button>
+                >Activate</b-button
+              >
             </div>
           </div>
         </nav>
@@ -232,23 +249,23 @@ export default class Lte extends Vue {
 
   get _connectedText(): string {
     if (this.connected) {
-      return "Conectado";
+      return "Connected";
     }
-    return "Desconectado";
+    return "Disconnected";
   }
 
   get _activeText(): string {
     if (this.active) {
-      return "Activo";
+      return "Active";
     }
-    return "Inactivo";
+    return "Inactive";
   }
 
   get _pingText(): string {
     if (this.ping) {
-      return "Recibido";
+      return "Received";
     } else {
-      return "No recibido";
+      return "Not Received";
     }
   }
 
