@@ -94,7 +94,14 @@ func (s *Server) Serve() {
 	// Listen for incoming connections.
 	log.Printf("listening on %s for HTTP connections\n", url)
 
-	err := http.ListenAndServe(url, s.apiRedirectRouter(s.router))
+	srv := &http.Server{
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		Addr:         url,
+		Handler:      s.apiRedirectRouter((s.router)),
+	}
+
+	err := srv.ListenAndServe()
 	if err != nil {
 		log.Println(err)
 		return
