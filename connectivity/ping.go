@@ -23,8 +23,8 @@ type PingResult struct {
 // will be returned after 2 seconds.
 // In order to execute this command you might need elevated privileges on Linux.
 // See: https://github.com/sparrc/go-ping for more details.
-func PingHost(address string) (time.Duration, error) {
-	timeout := time.NewTimer(time.Second * 2).C
+func PingHost(address string, timeout time.Duration) (time.Duration, error) {
+	timeoutC := time.NewTimer(timeout).C
 	avgPing := time.Second * 2
 
 	pinger, err := goping.NewPinger(address)
@@ -43,7 +43,7 @@ func PingHost(address string) (time.Duration, error) {
 	}()
 
 	select {
-	case <-timeout:
+	case <-timeoutC:
 		return avgPing, fmt.Errorf("no reply received from %s", address)
 	case s := <-result:
 		avgPing = s.AvgRtt
@@ -85,7 +85,7 @@ func PingHosts(addresses []string) PingResults {
 func pingAsync(address string, wg *sync.WaitGroup, resCh chan<- PingResult) {
 	defer wg.Done()
 	var res PingResult
-	ping, err := PingHost(address)
+	ping, err := PingHost(address, time.Second*2)
 	if err != nil {
 		res = PingResult{address, time.Second * 0, true}
 	} else {
