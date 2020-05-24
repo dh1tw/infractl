@@ -61,8 +61,17 @@ func reset4g(cmd *cobra.Command, args []string) {
 	}
 
 	mt := microtik.New(mConfig)
+
+	// before we can reset the 4G modem, we must make sure that the ADSL route
+	// is active. Otherwise, when the 4G route would become unavailable after the reset
+	// and no other route is available, microtik generates a new dynamical route which
+	// messes up the configuration.
+	if err := mt.SetRoute("adsl", "disabled=false"); err != nil {
+		log.Fatal(err)
+	}
+
 	if err := mt.Reset4G(); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("4G reset sucessfully initiated")
+	log.Println("4G reset successfully initiated")
 }

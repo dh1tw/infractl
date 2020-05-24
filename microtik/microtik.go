@@ -79,7 +79,7 @@ func (m *Microtik) Reset4G() error {
 }
 
 // RouteStatus allows to query this status of a particular route on a
-// microtik device (ip/route). The corresponing route must be registered during
+// microtik device (ip/route). The corresponding route must be registered during
 // construction of the Microtik object, otherwise this method will fail.
 // This method returns three parameters:
 // 1. route disabled (bool)

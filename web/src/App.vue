@@ -134,6 +134,12 @@ export default class App extends Vue {
 
   getPing4G(): void {
     var self = this;
+
+    // return if LTE modem is resetting
+    if (self.lte_restarting) {
+      return;
+    }
+
     axios
       .get("/api/ping/nats.ddns.net", {
         timeout: this.ajax_timeout,
@@ -148,10 +154,6 @@ export default class App extends Vue {
         }
       })
       .catch(function(error) {
-        // omit error if LTE modem is resetting
-        if (self.lte_restarting) {
-          return;
-        }
         if (error == "Error: Network Error") {
           return;
         }
