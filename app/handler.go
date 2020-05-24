@@ -3,7 +3,6 @@ package webserver
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -32,7 +31,6 @@ func (s *Server) handlePing(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Println(host)
 	pingRes, err := connectivity.PingHost(host, time.Second*2, 1)
 	if err != nil {
 		w.WriteHeader(http.StatusRequestTimeout)
