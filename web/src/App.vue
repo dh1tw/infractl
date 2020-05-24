@@ -73,7 +73,7 @@ if (process.env.NODE_ENV === "development") {
   },
 })
 export default class App extends Vue {
-  private ajax_timeout: number = 2500;
+  private ajax_timeout: number = 2500; //ms
   private adsl_connected: boolean = false;
   private adsl_active: boolean = false;
   private adsl_ping: boolean = false;
@@ -99,38 +99,66 @@ export default class App extends Vue {
   mounted(): void {
     var self = this;
     setInterval(function() {
-      self.getPing();
-      self.getStatus4g();
+      self.getPingADSL();
+      self.getPing4G();
       self.getRouteStatus();
+    }, 3000);
+    setInterval(function() {
+      self.getStatus4g();
     }, 3000);
   }
 
-  getPing(): void {
+  getPingADSL(): void {
     var self = this;
     axios
-      .get("/api/ping", {
+      .get("/api/ping/google.com", {
         timeout: this.ajax_timeout,
       })
       .then(function(response) {
         // console.log(response);
-        var data = response.data;
-        var nats = data["nats.ddns.net"];
-        if (!nats.failed && Number(nats.rtt) > 0) {
-          self.lte_ping = true;
-        }
-        var google = data["google.com"];
-        if (!google.failed && Number(google.rtt) > 0) {
+        var pingRes = response.data;
+        if (!pingRes.failed && Number(pingRes.rtt) > 0) {
           self.adsl_ping = true;
           self.adsl_connected = true;
+        } else {
+          self.adsl_ping = false;
+          self.adsl_connected = false;
         }
         self.loaded_ping = true;
+      })
+      .catch(function(error) {
+        if (error == "Error: Network Error") {
+          return;
+        }
+        self.notify(`unable to get ping over ADSL (${error})`, "is-danger");
+      });
+  }
+
+  getPing4G(): void {
+    var self = this;
+    axios
+      .get("/api/ping/nats.ddns.net", {
+        timeout: this.ajax_timeout,
+      })
+      .then(function(response) {
+        // console.log(response);
+        var pingRes = response.data;
+        if (!pingRes.failed && Number(pingRes.rtt) > 0) {
+          self.lte_ping = true;
+        } else {
+          self.lte_ping = false;
+        }
       })
       .catch(function(error) {
         // omit error if LTE modem is resetting
         if (self.lte_restarting) {
           return;
         }
-        self.notify(`unable to get ping information (${error})`, "is-danger");
+        if (error == "Error: Network Error") {
+          return;
+        }
+        self.lte_ping = false;
+        self.notify(`unable to get ping over 4G (${error})`, "is-danger");
       });
   }
 
@@ -158,6 +186,9 @@ export default class App extends Vue {
         self.loaded_routes = true;
       })
       .catch(function(error) {
+        if (error == "Error: Network Error") {
+          return;
+        }
         self.notify(`unable to get route information (${error})`, "is-danger");
       });
   }
@@ -196,6 +227,9 @@ export default class App extends Vue {
       .catch(function(error) {
         // omit error if LTE modem is resetting
         if (self.lte_restarting) {
+          return;
+        }
+        if (error == "Error: Network Error") {
           return;
         }
         self.notify(`unable to update 4G status (${error})`, "is-danger");
@@ -279,11 +313,12 @@ export default class App extends Vue {
 
   notify(msg: string, type: string): void {
     this.$notification.open({
-      duration: 5000,
+      duration: 3000,
       message: msg,
       position: "is-top-right",
       type: "is-danger",
-      // hasIcon: true
+      queue: false,
+      // hasIcon: true,
     });
   }
 

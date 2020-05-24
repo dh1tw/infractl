@@ -77,6 +77,20 @@ func PingInterval(interval time.Duration) func(*Server) {
 	}
 }
 
+// PingTimeout sets the timeout for each ping query cycle
+func PingTimeout(timeout time.Duration) func(*Server) {
+	return func(s *Server) {
+		s.pingTimeout = timeout
+	}
+}
+
+// PingSamples sets the amount of pings sent to each host (for averaging)
+func PingSamples(samples int) func(*Server) {
+	return func(s *Server) {
+		s.pingSamples = samples
+	}
+}
+
 // Service authorizes the webserver to control a systemd service. Services can
 // either be specified with or without the extension ".service"
 func Service(serviceName string) func(*Server) {

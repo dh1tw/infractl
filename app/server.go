@@ -31,6 +31,8 @@ type Server struct {
 	pingEnabled     bool
 	pingInterval    time.Duration
 	pingHosts       []string
+	pingSamples     int
+	pingTimeout     time.Duration
 	pingResults     connectivity.PingResults
 	services        map[string]struct{}
 	mtRoutes        []string
@@ -51,6 +53,8 @@ func New(opts ...Option) *Server {
 		pingHosts:       []string{},
 		pingEnabled:     false,
 		pingInterval:    time.Duration(time.Second * 10),
+		pingTimeout:     time.Second * 9,
+		pingSamples:     1,
 		pingResults:     make(connectivity.PingResults),
 		mf823Parameters: []string{},
 		errorCh:         make(chan struct{}),
@@ -117,7 +121,7 @@ func (s *Server) startPing(interval time.Duration) {
 		hosts := s.pingHosts
 		s.Unlock()
 
-		res := connectivity.PingHosts(hosts)
+		res := connectivity.PingHosts(hosts, time.Second*2, 1)
 		s.Lock()
 		s.pingResults = res
 		s.Unlock()

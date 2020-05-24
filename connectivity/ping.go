@@ -2,6 +2,7 @@ package connectivity
 
 import (
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -18,18 +19,23 @@ type PingResult struct {
 	Failed  bool          `json:"failed"`
 }
 
-// PingHost will send a single ping to the specified IP address or URL and return
-// the round trip time. In case the IP address is unreachable, an error
-// will be returned after 2 seconds.
+// PingHost will send a specified amount of pings to the specified IP address or URL and return
+// the average round trip time. In case the IP address is unreachable, an error will be returned
+// after the provided timeout.
 // In order to execute this command you might need elevated privileges on Linux.
 // See: https://github.com/sparrc/go-ping for more details.
-func PingHost(address string, timeout time.Duration) (time.Duration, error) {
+func PingHost(address string, timeout time.Duration, samples int) (PingResult, error) {
 	timeoutC := time.NewTimer(timeout).C
-	avgPing := time.Second * 2
+
+	pr := PingResult{
+		Address: address,
+		RTT:     0,
+		Failed:  true,
+	}
 
 	pinger, err := goping.NewPinger(address)
 	if err != nil {
-		return avgPing, err
+		return pr, err
 	}
 
 	pinger.SetPrivileged(true)
@@ -37,27 +43,28 @@ func PingHost(address string, timeout time.Duration) (time.Duration, error) {
 	result := make(chan (*goping.Statistics))
 
 	go func() {
-		pinger.Count = 1
+		pinger.Count = samples
 		pinger.Run() // blocks until finished
 		result <- pinger.Statistics()
 	}()
 
 	select {
 	case <-timeoutC:
-		return avgPing, fmt.Errorf("no reply received from %s", address)
+		return pr, fmt.Errorf("no reply received from %s after %v", address, timeout)
 	case s := <-result:
-		avgPing = s.AvgRtt
+		pr.RTT = s.AvgRtt
+		pr.Failed = false
 	}
 
-	return avgPing, nil
+	return pr, nil
 }
 
-// PingHosts will send a single ping to the specified IP addresses or URLs.
-// In case the IP address is unreachable, an error will be returned after
-// 2 seconds.
+// PingHosts will send a specified amount of pings to the provided list of IP addresses or URLs
+// and return the average round trip time. In case the IP address is unreachable, an error will
+// be returned after the provided timeout.
 // In order to execute this command you might need elevated privileges on Linux.
-// See: https://github.com/sparrc/go-ping for more details
-func PingHosts(addresses []string) PingResults {
+// See: https://github.com/sparrc/go-ping for more details.
+func PingHosts(addresses []string, timeout time.Duration, samples int) PingResults {
 
 	resultCh := make(chan PingResult)
 
@@ -65,7 +72,7 @@ func PingHosts(addresses []string) PingResults {
 
 	for _, addr := range addresses {
 		wg.Add(1)
-		go pingAsync(addr, wg, resultCh)
+		go pingAsync(addr, wg, resultCh, timeout, samples)
 	}
 
 	results := make(PingResults)
@@ -82,14 +89,12 @@ func PingHosts(addresses []string) PingResults {
 	return results
 }
 
-func pingAsync(address string, wg *sync.WaitGroup, resCh chan<- PingResult) {
+func pingAsync(address string, wg *sync.WaitGroup, resCh chan<- PingResult, timeout time.Duration, samples int) {
 	defer wg.Done()
 	var res PingResult
-	ping, err := PingHost(address, time.Second*2)
+	res, err := PingHost(address, timeout, samples)
 	if err != nil {
-		res = PingResult{address, time.Second * 0, true}
-	} else {
-		res = PingResult{address, ping, false}
+		log.Println(err)
 	}
 	resCh <- res
 }

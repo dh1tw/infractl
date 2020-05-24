@@ -3,8 +3,10 @@ package webserver
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/dh1tw/infractl/microtik"
 
@@ -21,18 +23,24 @@ func (s *Server) handlePing(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	s.Lock()
-	res := s.pingResults
-	enabled := s.pingEnabled
-	hosts := s.pingHosts
-	s.Unlock()
+	vars := mux.Vars(req)
+	host := strings.ToLower(vars["host"])
 
-	// execute the ping if the background pinging has not been enabled
-	if !enabled {
-		res = connectivity.PingHosts(hosts)
+	if len(host) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("no host url or ip address provided"))
+		return
 	}
 
-	if err := json.NewEncoder(w).Encode(res); err != nil {
+	log.Println(host)
+	pingRes, err := connectivity.PingHost(host, time.Second*2, 1)
+	if err != nil {
+		w.WriteHeader(http.StatusRequestTimeout)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(pingRes); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("unable to encode ping data to json"))
 	}

@@ -9,7 +9,7 @@
       class="message"
       v-bind:class="{ 'is-success': active, 'is-black': !active }"
     >
-      <h4 class="message-header">LTE / 4G</h4>
+      <h4 class="message-header">4G (LTE)</h4>
       <div class="message-body">
         <div class="container">
           <div class="columns is-mobile">
