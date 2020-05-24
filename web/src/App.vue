@@ -77,7 +77,6 @@ export default class App extends Vue {
   private adsl_connected: boolean = false;
   private adsl_active: boolean = false;
   private adsl_ping: boolean = false;
-  private loaded_ping: boolean = false;
   private loaded_status4g: boolean = false;
   private loaded_routes: boolean = false;
   private lte_restarting: boolean = false;
@@ -124,13 +123,14 @@ export default class App extends Vue {
           self.adsl_ping = false;
           self.adsl_connected = false;
         }
-        self.loaded_ping = true;
       })
       .catch(function(error) {
         if (error == "Error: Network Error") {
           return;
         }
-        self.notify(`unable to get ping over ADSL (${error})`, "is-danger");
+        self.adsl_ping = false;
+        self.adsl_connected = false;
+        // self.notify(`unable to get ping over ADSL (${error})`, "is-danger");
       });
   }
 
@@ -158,7 +158,7 @@ export default class App extends Vue {
           return;
         }
         self.lte_ping = false;
-        self.notify(`unable to get ping over 4G (${error})`, "is-danger");
+        // self.notify(`unable to get ping over 4G (${error})`, "is-danger");
       });
   }
 
@@ -342,7 +342,7 @@ export default class App extends Vue {
   }
 
   get is_loading(): boolean {
-    if (this.loaded_ping && this.loaded_status4g && this.loaded_routes) {
+    if (this.loaded_status4g && this.loaded_routes) {
       return false;
     }
     return true;
