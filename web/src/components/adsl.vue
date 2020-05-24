@@ -14,23 +14,6 @@
         <div class="container">
           <div class="columns is-mobile">
             <div class="column is-6">
-              <p class="is-pulled-right">Status:</p>
-            </div>
-            <div class="column is-6">
-              <span
-                class="tag is-pulled-left"
-                v-bind:class="{
-                  'is-danger': !connected,
-                  'is-success': connected,
-                }"
-                >{{ _connectedText }}</span
-              >
-            </div>
-          </div>
-        </div>
-        <div class="container">
-          <div class="columns is-mobile">
-            <div class="column is-6">
               <p class="is-pulled-right">Ping:</p>
             </div>
             <div class="column is-6">
@@ -82,7 +65,6 @@ import { Component, Prop, Emit, Watch, Vue } from "vue-property-decorator";
 @Component({})
 export default class Adsl extends Vue {
   @Prop() is_loading!: boolean;
-  @Prop() connected!: boolean;
   @Prop() active!: boolean;
   @Prop() ping!: boolean;
 
@@ -91,13 +73,6 @@ export default class Adsl extends Vue {
   @Emit("activateadsl")
   activateAdsl() {
     this.activating_adsl = true;
-  }
-
-  get _connectedText(): string {
-    if (this.connected) {
-      return "Connected";
-    }
-    return "Disconnected";
   }
 
   get _activeText(): string {

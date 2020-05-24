@@ -13,7 +13,6 @@
         <div class="columns">
           <div class="column is-half">
             <Adsl
-              :connected="adsl_connected"
               :active="adsl_active"
               :ping="adsl_ping"
               :is_loading="is_loading"
@@ -74,7 +73,6 @@ if (process.env.NODE_ENV === "development") {
 })
 export default class App extends Vue {
   private ajax_timeout: number = 2500; //ms
-  private adsl_connected: boolean = false;
   private adsl_active: boolean = false;
   private adsl_ping: boolean = false;
   private loaded_status4g: boolean = false;
@@ -118,7 +116,6 @@ export default class App extends Vue {
         var pingRes = response.data;
         if (!pingRes.failed && Number(pingRes.rtt) > 0) {
           self.adsl_ping = true;
-          self.adsl_connected = true;
         } else {
           self.adsl_ping = false;
         }
