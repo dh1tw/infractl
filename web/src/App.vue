@@ -121,7 +121,6 @@ export default class App extends Vue {
           self.adsl_connected = true;
         } else {
           self.adsl_ping = false;
-          self.adsl_connected = false;
         }
       })
       .catch(function(error) {
@@ -129,7 +128,6 @@ export default class App extends Vue {
           return;
         }
         self.adsl_ping = false;
-        self.adsl_connected = false;
         // self.notify(`unable to get ping over ADSL (${error})`, "is-danger");
       });
   }
