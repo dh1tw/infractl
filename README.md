@@ -1,5 +1,8 @@
 # Infractl
 
+![Build Status](https://github.com/dh1tw/infractl/workflows/Cross%20Platform%20build/badge.svg?branch=master)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://img.shields.io/badge/license-MIT-blue.svg)
+
 Infractl is a collection of tools which have been developed to monitor
 & control the network infrastructure at ED1R.
 
@@ -45,4 +48,3 @@ infractl is published under the permissive [MIT license](https://github.com/dh1t
 
 The auto generated documentation can be found at
 [godoc.org](https://godoc.org/github.com/dh1tw/infractl).
-
