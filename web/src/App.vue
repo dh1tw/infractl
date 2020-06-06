@@ -43,11 +43,20 @@
         </div>
       </div>
     </section>
-    <section>
+    <div class="section">
       <div class="container">
-        <Services v-on:restart-nats="restartNats"></Services>
+        <div class="columns">
+          <div class="column is-full">
+            <Services
+              :services="services"
+              v-on:startService="startService"
+              v-on:stopService="stopService"
+              v-on:restartService="restartService"
+            ></Services>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
@@ -68,8 +77,8 @@ if (process.env.NODE_ENV === "development") {
   components: {
     Adsl,
     Lte,
-    Services,
-  },
+    Services
+  }
 })
 export default class App extends Vue {
   private ajax_timeout: number = 2500; //ms
@@ -92,6 +101,11 @@ export default class App extends Vue {
   private lte_consumption: number = 0;
   private lte_consumption_upload: number = 0;
   private lte_consumption_download: number = 0;
+  private services: Array<object> = [];
+
+  beforeCreated(): void {
+    this.getServices();
+  }
 
   mounted(): void {
     var self = this;
@@ -102,6 +116,7 @@ export default class App extends Vue {
     }, 3000);
     setInterval(function() {
       self.getStatus4g();
+      self.getServices();
     }, 3000);
   }
 
@@ -109,7 +124,7 @@ export default class App extends Vue {
     var self = this;
     axios
       .get("/api/ping/google.com", {
-        timeout: this.ajax_timeout,
+        timeout: this.ajax_timeout
       })
       .then(function(response) {
         // console.log(response);
@@ -139,7 +154,7 @@ export default class App extends Vue {
 
     axios
       .get("/api/ping/nats.ddns.net", {
-        timeout: this.ajax_timeout,
+        timeout: this.ajax_timeout
       })
       .then(function(response) {
         // console.log(response);
@@ -163,7 +178,7 @@ export default class App extends Vue {
     var self = this;
     axios
       .get("/api/routes", {
-        timeout: this.ajax_timeout,
+        timeout: this.ajax_timeout
       })
       .then(function(response) {
         // console.log(response);
@@ -194,7 +209,7 @@ export default class App extends Vue {
     var self = this;
     axios
       .get("/api/status4g", {
-        timeout: this.ajax_timeout,
+        timeout: this.ajax_timeout
       })
       .then(function(response) {
         // console.log(response);
@@ -239,7 +254,7 @@ export default class App extends Vue {
     this.loaded_status4g = false;
     axios
       .get("/api/reset4g", {
-        timeout: this.ajax_timeout,
+        timeout: this.ajax_timeout
       })
       .then(function() {
         // disable error messages until lte has restarted
@@ -269,7 +284,7 @@ export default class App extends Vue {
     var self = this;
     axios
       .get("/api/route/adsl/disable", {
-        timeout: this.ajax_timeout,
+        timeout: this.ajax_timeout
       })
       .then(function() {
         // console.log("4g enabled ok");
@@ -284,7 +299,7 @@ export default class App extends Vue {
     var self = this;
     axios
       .get("/api/route/adsl/enable", {
-        timeout: this.ajax_timeout,
+        timeout: this.ajax_timeout
       })
       .then(function() {
         // nothing to do
@@ -295,15 +310,64 @@ export default class App extends Vue {
       });
   }
 
-  restartNats(): void {
+  startService(serviceName: string): void {
     var self = this;
     axios
-      .get("/api/service/nats/restart")
+      .get("/api/service/" + serviceName + "/start")
+      .then(function() {
+        // nothing to do
+      })
+      .catch(function(error) {
+        self.notify(
+          `unable to start service ${serviceName} (${error})`,
+          "is-danger"
+        );
+        self.printAxiosError(error);
+      });
+  }
+
+  stopService(serviceName: string): void {
+    var self = this;
+    axios
+      .get("/api/service/" + serviceName + "/stop")
+      .then(function() {
+        // nothing to do
+      })
+      .catch(function(error) {
+        self.notify(
+          `unable to start service ${serviceName} (${error})`,
+          "is-danger"
+        );
+        self.printAxiosError(error);
+      });
+  }
+
+  restartService(serviceName: string): void {
+    var self = this;
+    axios
+      .get("/api/service/" + serviceName + "/restart")
       .then(function() {
         // nothing to do
       })
       .catch(function(error) {
         self.notify(`unable to restart service NATS (${error})`, "is-danger");
+        self.printAxiosError(error);
+      });
+  }
+
+  getServices(): void {
+    var self = this;
+    axios
+      .get("/api/services")
+      .then(function(services) {
+        self.services = services.data;
+        // console.log(services.data);
+      })
+      .catch(function(error) {
+        self.notify(
+          `unable get the list of systemd services (${error})`,
+          "is-danger"
+        );
         self.printAxiosError(error);
       });
   }
@@ -314,7 +378,7 @@ export default class App extends Vue {
       message: msg,
       position: "is-top-right",
       type: "is-danger",
-      queue: false,
+      queue: false
       // hasIcon: true,
     });
   }

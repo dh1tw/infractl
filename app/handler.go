@@ -110,6 +110,88 @@ func (s *Server) handleStatus4G(w http.ResponseWriter, req *http.Request) {
 	w.Write(j)
 }
 
+func (s *Server) handleServicesList(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	s.Lock()
+	myServices := s.services
+	s.Unlock()
+
+	myServicesList := []string{}
+
+	for sName := range myServices {
+		myServicesList = append(myServicesList, sName)
+	}
+
+	res, err := services.Status(myServicesList...)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unable to list systemd services")))
+		return
+	}
+
+	j, err := json.Marshal(res)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+
+	}
+	w.Write(j)
+
+}
+
+func (s *Server) handleServiceStart(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	s.Lock()
+	defer s.Unlock()
+
+	vars := mux.Vars(req)
+	sName := strings.ToLower(vars["service"])
+	sName = strings.Replace(sName, ".service", "", 1)
+
+	if _, ok := s.services[sName]; !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unauthorized service")))
+		return
+	}
+
+	if err := services.Start(sName); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf(err.Error())))
+		return
+	}
+}
+
+func (s *Server) handleServiceStop(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	s.Lock()
+	defer s.Unlock()
+
+	vars := mux.Vars(req)
+	sName := strings.ToLower(vars["service"])
+	sName = strings.Replace(sName, ".service", "", 1)
+
+	if _, ok := s.services[sName]; !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("unauthorized service")))
+		return
+	}
+
+	if err := services.Stop(sName); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf(err.Error())))
+		return
+	}
+}
+
 func (s *Server) handleServiceRestart(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
