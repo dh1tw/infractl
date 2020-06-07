@@ -45,16 +45,12 @@
     </section>
     <div class="section">
       <div class="container">
-        <div class="columns">
-          <div class="column is-full">
-            <Services
-              :services="services"
-              v-on:startService="startService"
-              v-on:stopService="stopService"
-              v-on:restartService="restartService"
-            ></Services>
-          </div>
-        </div>
+        <Services
+          :services="services"
+          v-on:startService="startService"
+          v-on:stopService="stopService"
+          v-on:restartService="restartService"
+        ></Services>
       </div>
     </div>
   </div>

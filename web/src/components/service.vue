@@ -1,68 +1,52 @@
 <template>
   <div
-    class="columns is-vcentered service is-mobile is-multiline has-background-grey-lighter"
+    class="columns is-marginless is-vcentered service is-mobile is-multiline"
+    v-bind:class="indexColor"
   >
-    <div
-      class="column is-5 is-hidden-tablet has-text-left has-text-weight-bold"
-    >
-      Name:
-    </div>
-    <div
-      class="column is-7-mobile is-2-tablet has-text-left has-text-weight-bold"
-    >
-      {{ serviceName }}
-    </div>
-    <div
-      class="column is-5 is-hidden-tablet has-text-left has-text-weight-bold"
-    >
-      Description:
-    </div>
-    <div class="column is-7-mobile is-4-tablet has-text-left">
-      {{ description }}
-    </div>
-    <div
-      class="column is-5 is-hidden-tablet has-text-left has-text-weight-bold"
-    >
-      State:
-    </div>
-    <div
-      class="column is-7-mobile is-1-tablet is-2-desktop has-text-left-mobile"
-    >
-      <b-tag v-bind:class="stateTag" rounded size="is-medium">{{
+    <div class="column is-5 is-hidden-tablet has-text-left has-text-weight-bold">Name:</div>
+    <div class="column is-7-mobile is-2-tablet has-text-left has-text-weight-bold">{{ serviceName }}</div>
+    <div class="column is-5 is-hidden-tablet has-text-left has-text-weight-bold">Description:</div>
+    <div class="column is-7-mobile is-4-tablet has-text-left">{{ description }}</div>
+    <div class="column is-5 is-hidden-tablet has-text-left has-text-weight-bold">State:</div>
+    <div class="column is-7-mobile is-1-tablet is-2-desktop has-text-left-mobile">
+      <b-tag v-bind:class="stateTag" rounded size="is-medium">
+        {{
         activeState
-      }}</b-tag>
+        }}
+      </b-tag>
     </div>
-    <div
-      class="column is-5 is-hidden-tablet has-text-left has-text-weight-bold"
-    >
-      Actions:
-    </div>
-    <div
-      class="column is-7-mobile is-5-tablet is-4-desktop has-text-left-mobile buttons"
-    >
-      <b-button
-        type="is-info"
-        :disabled="startBtnState"
-        :loading="startBtnLoading"
-        icon-left="play"
-        @click="startService(name)"
-        >Start</b-button
-      >
-      <b-button
-        type="is-info"
-        :disabled="stopBtnState"
-        :loading="stopBtnLoading"
-        icon-left="stop"
-        @click="stopService(name)"
-        >Stop</b-button
-      >
-      <b-button
-        type="is-info"
-        :loading="restartBtnLoading"
-        icon-left="restart"
-        @click="restartService(name)"
-        >Restart</b-button
-      >
+    <div class="column is-5-tablet is-4-desktop">
+      <div class="columns is-multiline">
+        <div class="column is-4">
+          <b-button
+            type="is-info"
+            class="is-fullwidth"
+            :disabled="startBtnState"
+            :loading="startBtnLoading"
+            icon-left="play"
+            @click="startService(name)"
+          >Start</b-button>
+        </div>
+        <div class="column is-4">
+          <b-button
+            type="is-info"
+            class="is-fullwidth"
+            :disabled="stopBtnState"
+            :loading="stopBtnLoading"
+            icon-left="stop"
+            @click="stopService(name)"
+          >Stop</b-button>
+        </div>
+        <div class="column is-4">
+          <b-button
+            type="is-info"
+            class="is-fullwidth"
+            :loading="restartBtnLoading"
+            icon-left="restart"
+            @click="restartService(name)"
+          >Restart</b-button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -77,6 +61,7 @@ export default class Service extends Vue {
   @Prop() activeState!: string;
   @Prop() loadState!: string;
   @Prop() subState!: string;
+  @Prop() index!: number;
 
   get serviceName(): string {
     var s = this.name.split(".");
@@ -112,11 +97,18 @@ export default class Service extends Vue {
   }
 
   get activeStateColor(): boolean {
-    console.log("activestate: ", this.activeState);
     if (this.activeState == "active") {
       return true;
     }
     return false;
+  }
+
+  get indexColor(): string {
+    if (this.index % 2 == 0) {
+      return "has-background-grey-lighter";
+    } else {
+      return "";
+    }
   }
 
   set active(newState: boolean) {
@@ -126,15 +118,6 @@ export default class Service extends Vue {
       this.$emit("stopService", this.name);
     }
   }
-
-  //   public changeState(newState: boolean): boolean {
-  //     var self = this;
-  //   }
-
-  //   public get changeState(): boolean {
-  //     console.log("reqested state");
-  //     return this.active;
-  //   }
 
   @Watch("activeState")
   onActiveStateChanged(newValue: string, oldValue: string) {

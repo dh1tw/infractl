@@ -1,31 +1,30 @@
 <template>
-  <section class="frame">
-    <div class="message is-dark">
-      <h4 class="message-header">Services</h4>
-      <div class="message-body">
-        <div class="container">
-          <div class="columns is-hidden-mobile">
-            <div class="column is-2 has-text-left has-text-weight-bold">Service Name</div>
-            <div class="column is-4 has-text-left has-text-weight-bold">Description</div>
-            <div class="column is-2 has-text-weight-bold">Status</div>
-            <div class="column is-4 has-text-weight-bold">Actions</div>
-          </div>
-          <div class="container service" v-for="service in servicesSorted" :key="service.name">
-            <Service
-              :name="service.Name"
-              :description="service.Description"
-              :activeState="service.ActiveState"
-              :loadState="service.LoadState"
-              :subState="service.SubState"
-              v-on:startService="startService"
-              v-on:stopService="stopService"
-              v-on:restartService="restartService"
-            ></Service>
-          </div>
+  <div class="message is-dark">
+    <h4 class="message-header">Services</h4>
+    <div class="message-body is-paddingless">
+      <div class="container">
+        <div class="columns is-hidden-mobile is-marginless">
+          <div class="column is-2 has-text-left has-text-weight-bold">Service Name</div>
+          <div class="column is-4 has-text-left has-text-weight-bold">Description</div>
+          <div class="column is-2 has-text-weight-bold">Status</div>
+          <div class="column is-4 has-text-weight-bold">Actions</div>
+        </div>
+        <div class="container" v-for="(service, index) in servicesSorted" :key="service.name">
+          <Service
+            :name="service.Name"
+            :index="index"
+            :description="service.Description"
+            :activeState="service.ActiveState"
+            :loadState="service.LoadState"
+            :subState="service.SubState"
+            v-on:startService="startService"
+            v-on:stopService="stopService"
+            v-on:restartService="restartService"
+          ></Service>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <script lang="ts">
