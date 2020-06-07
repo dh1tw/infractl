@@ -46,6 +46,33 @@ Priority:
 
 infractl is published under the permissive [MIT license](https://github.com/dh1tw/infractl/blob/master/LICENSE).
 
+## Dependencies
+
+The WebUI is written in Typescript, using the [Vue.js reactive framework](https://vuejs.org). In order to compile the files to javascript, you need to have [node.js](https://nodejs.org) (version 10 LTS) and [yarn package manager](https://yarnpkg.com) installed.
+
+``` bash
+
+$ curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+$ curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+$ echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+$ sudo apt update
+$ sudo apt install nodejs
+$ sudo apt install yarn
+
+```
+
+## How to build
+
+On Linux and MacOS you can leverage the [Makefile](Makefile).
+
+``` bash
+
+$ make install-deps
+$ make generate
+$ make dist
+
+```
+
 ## Documentation
 
 The auto generated documentation can be found at
