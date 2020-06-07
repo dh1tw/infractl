@@ -50,6 +50,7 @@ func PingHost(address string, timeout time.Duration, samples int) (PingResult, e
 
 	select {
 	case <-timeoutC:
+		pinger.Stop()
 		return pr, fmt.Errorf("no reply received from %s after %v", address, timeout)
 	case s := <-result:
 		pr.RTT = s.AvgRtt
