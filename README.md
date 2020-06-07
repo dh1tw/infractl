@@ -3,6 +3,8 @@
 ![Build Status](https://github.com/dh1tw/infractl/workflows/Cross%20Platform%20build/badge.svg?branch=master)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://img.shields.io/badge/license-MIT-blue.svg)
 
+![Screenshot infractl web interface](.assets/infractl-web.jpeg)
+
 Infractl is a collection of tools which have been developed to monitor
 & control the network infrastructure at ED1R.
 
